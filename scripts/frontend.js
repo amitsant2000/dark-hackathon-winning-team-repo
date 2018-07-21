@@ -5,7 +5,7 @@ var opponents = []
 function Player(image,color,username) {
   this.username = username;
   this.color = color;
-  this.health=100;
+  this.health=10;
   this.mover = {x:0,y:0,currx:0,curry:0,first:true}
   this.start = function(){
     var a = Math.floor(Math.random()*window.innerWidth)
@@ -96,7 +96,20 @@ function Bullet(Player,x,y,mousex,mousey,opp){
     for (var alpha = 0; alpha< opp.length;alpha++){
       var current = opp[alpha];
       if(this.x+this.radius>current.mover.currx&&this.x-this.radius<current.mover.currx+45&&this.y+this.radius>current.mover.curry&&this.y-this.radius<current.mover.curry+45){
-        alert('collided')
+        $.ajax({
+          method:'POST',
+          url:'http://owen-hackandslash.builtwithdark.com/damage',
+          data:{
+            username:z.username
+          }
+          ,success:function(successObj){
+            if(successObj.Player.health === 0){
+              alert(successObj.Player.username+" lost")
+            }
+          },error:function(err){
+            console.log(err);
+          }
+        })
       }
     }
 
@@ -136,6 +149,45 @@ z.start()
 function animate(){
   c.clearRect(0,0,window.innerWidth,window.innerHeight)
   z.update();
+  $.ajax({
+    method:'POST',
+    url:'http://owen-hackandslash.builtwithdark.com/self',
+    data:{
+      mover:z.mover,
+      username:z.username
+    },success:function(){
+      $.ajax({
+        method:'GET',
+        url:'http://owen-hackandslash.builtwithdark.com/players?username='+z.username
+        ,success:function(successObj){
+          opponents = successObj.everyoneButMe
+          $.ajax({
+            method:'GET',
+            url:'http://owen-hackandslash.builtwithdark.com/health?username='+z.username
+            ,success:function(successObj){
+              opponents = successObj.health
+              $.ajax({
+                method:'GET',
+                url:'http://owen-hackandslash.builtwithdark.com/bullets'
+                ,success:function(successObj){
+                  opponents = successObj.bullets
+
+                },error:function(err){
+                  console.log(err);
+                }
+              })
+            },error:function(err){
+              console.log(err);
+            }
+          })
+        },error:function(err){
+          console.log(err);
+        }
+      })
+    },error:function(err){
+      console.log(err);
+    }
+  })
   for(var n = 0; n<bullets.length;n++){
     bullets[n].update()
 
