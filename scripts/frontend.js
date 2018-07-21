@@ -193,7 +193,7 @@ function animate(){
 
   z.update();
   for (var q = 0; q<opponents.length;q++){
-    opponents[q].update
+    opponents[q].update()
   }
   for(var n = 0; n<bullets.length;n++){
     bullets[n].update()
