@@ -3,13 +3,6 @@ var canvas = document.querySelector('canvas');
 var mouse ={};
 var opponents = []
 function Player(image,color,username) {
-  // use the intrinsic size of image in CSS pixels for the canvas element
-
-  // will draw the image as 300x227 ignoring the custom size of 60x45
-  // given in the constructor
-  // To use the custom size we'll have to specify the scale parameters
-  // using the element's width and height properties - lets draw one
-  // on top in the corner:
   this.username = username;
   this.color = color;
   this.health=100;
@@ -33,7 +26,6 @@ var bullets = []
 var image = new Image(50, 50);
 image.src = './images/character.gif';
 var z = new Player(image,'blue','Amit');
-
 
 $(document).ready(function(){
   var a = window.innerWidth;
@@ -78,7 +70,7 @@ window.addEventListener('keydown',function(event){
   }
 })
 
-function Bullet(Player,x,y,mousex,mousey){
+function Bullet(Player,x,y,mousex,mousey,opp){
   this.x = x;
   this.y = y;
   this.xDiff = mousex-x;
@@ -87,9 +79,10 @@ function Bullet(Player,x,y,mousex,mousey){
   this.multiplier = this.velocity/Math.sqrt((this.xDiff*this.xDiff)+(this.yDiff*this.yDiff));
   this.dx = this.xDiff*this.multiplier;
   this.dy = this.yDiff*this.multiplier;
+  this.radius = 3
   this.start = function(){
     c.beginPath();
-    c.arc(this.x,this.y,3,0,Math.PI*2,false)
+    c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
     c.strokeStyle = z.color
     c.stroke()
   };
@@ -97,11 +90,14 @@ function Bullet(Player,x,y,mousex,mousey){
     this.x+=this.dx;
     this.y+=this.dy;
     c.beginPath();
-    c.arc(this.x,this.y,3,0,Math.PI*2,false)
+    c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
     c.strokeStyle = z.color
     c.stroke()
-    for (var alpha = 0; alpha< opponents.length;alpha++){
-      if(oppon)
+    for (var alpha = 0; alpha< opp.length;alpha++){
+      var current = opp[alpha];
+      if(this.x+this.radius>current.mover.currx&&this.x-this.radius<current.mover.currx+45&&this.y+this.radius>current.mover.curry&&this.y-this.radius<current.mover.curry+45){
+        alert('collided')
+      }
     }
 
   };
@@ -118,7 +114,7 @@ window.addEventListener('keyup',function(event){
   }
 })
 window.addEventListener('click',function(event){
-  var a = new Bullet(z,z.mover.currx+50,z.mover.curry+37,mouse.x,mouse.y)
+  var a = new Bullet(z,z.mover.currx+50,z.mover.curry+37,mouse.x,mouse.y,opponents)
   a.start();
   bullets.push(a);
 })
