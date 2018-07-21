@@ -120,7 +120,12 @@ window.addEventListener('click',function(event){
 })
 
 
-
+window.addEventListener('contextmenu',function(event){
+  event.preventDefault()
+  var a = new Bullet(z,z.mover.currx+50,z.mover.curry+37,mouse.x,mouse.y,opponents)
+  a.start();
+  bullets.push(a);
+})
 window.addEventListener('resize',function(){
   var a = window.innerWidth;
   var b = window.innerHeight;
