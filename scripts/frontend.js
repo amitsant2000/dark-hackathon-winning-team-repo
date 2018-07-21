@@ -1,7 +1,7 @@
 var g = $('.game-field');
 var canvas = document.querySelector('canvas');
 var mouse ={};
-var opponents = []
+var opponents = [];
 function Player(image,color,username) {
   this.username = username;
   this.color = color;
@@ -93,7 +93,7 @@ function Bullet(Player,x,y,mousex,mousey,opp){
     c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
     c.strokeStyle = z.color
     c.stroke()
-    for (var alpha = 0; alpha< opp.length;alpha++){
+    for (var alpha = 0; alpha< opp.length ;alpha++){
       var current = opp[alpha];
       if(this.x+this.radius>current.mover.currx&&this.x-this.radius<current.mover.currx+45&&this.y+this.radius>current.mover.curry&&this.y-this.radius<current.mover.curry+45){
         $.ajax({
@@ -148,7 +148,6 @@ window.addEventListener('resize',function(){
 z.start()
 function animate(){
   c.clearRect(0,0,window.innerWidth,window.innerHeight)
-  z.update();
   $.ajax({
     method:'POST',
     url:'http://owen-hackandslash.builtwithdark.com/self',
@@ -160,18 +159,21 @@ function animate(){
         method:'GET',
         url:'http://owen-hackandslash.builtwithdark.com/players?username='+z.username
         ,success:function(successObj){
-          opponents = successObj.everyoneButMe
+          if(successObj.everyoneButMe!=undefined){
+            opponents = successObj.everyoneButMe
+          }
           $.ajax({
             method:'GET',
             url:'http://owen-hackandslash.builtwithdark.com/health?username='+z.username
             ,success:function(successObj){
-              opponents = successObj.health
+              z.health = successObj.health
               $.ajax({
                 method:'GET',
                 url:'http://owen-hackandslash.builtwithdark.com/bullets'
                 ,success:function(successObj){
-                  opponents = successObj.bullets
-
+                  if(successObj.bullets!=undefined){
+                    bullets = successObj.bullets
+                  }
                 },error:function(err){
                   console.log(err);
                 }
@@ -188,6 +190,11 @@ function animate(){
       console.log(err);
     }
   })
+
+  z.update();
+  for (var q = 0; q<opponents.length;q++){
+    opponents[q].update
+  }
   for(var n = 0; n<bullets.length;n++){
     bullets[n].update()
 
