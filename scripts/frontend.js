@@ -1,12 +1,13 @@
 var g = $('.game-field');
 var canvas = document.querySelector('canvas');
 var mouse ={};
+var mover = {x:0,y:0,currx:0,curry:0,first:true}
 var opponents = [];
-function Player(image,color,username) {
+function Player(image,color,username,mover) {
   this.username = username;
   this.color = color;
   this.health=10;
-  this.mover = {x:0,y:0,currx:0,curry:0,first:true}
+  this.mover = mover
   this.start = function(){
     var a = Math.floor(Math.random()*window.innerWidth)
     var b =Math.floor(Math.random()*window.innerHeight)
@@ -148,6 +149,7 @@ window.addEventListener('resize',function(){
 z.start()
 function animate(){
   c.clearRect(0,0,window.innerWidth,window.innerHeight)
+  opponents = []
   $.ajax({
     method:'POST',
     url:'http://owen-hackandslash.builtwithdark.com/self',
@@ -160,7 +162,9 @@ function animate(){
         url:'http://owen-hackandslash.builtwithdark.com/players?username='+z.username
         ,success:function(successObj){
           if(successObj.everyoneButMe!=undefined){
-            opponents = successObj.everyoneButMe
+            for(var qwert = 0; qwert<successObj.everyoneButMe;qwert++){
+              opponents.push(new Player(image,successObj.everyoneButMe.color,successObj.everyoneButMe.username,successObj.everyoneButMe.mover))
+            }
           }
           $.ajax({
             method:'GET',
