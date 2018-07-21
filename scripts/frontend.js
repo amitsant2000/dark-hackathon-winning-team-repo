@@ -1,17 +1,44 @@
 var g = $('.game-field');
 var canvas = document.querySelector('canvas');
 var mouse ={};
+var opponents = []
+function Player(image,color,username) {
+  // use the intrinsic size of image in CSS pixels for the canvas element
+
+  // will draw the image as 300x227 ignoring the custom size of 60x45
+  // given in the constructor
+  // To use the custom size we'll have to specify the scale parameters
+  // using the element's width and height properties - lets draw one
+  // on top in the corner:
+  this.username = username;
+  this.color = color;
+  this.health=100;
+  this.mover = {x:0,y:0,currx:0,curry:0,first:true}
+  this.start = function(){
+    var a = Math.floor(Math.random()*window.innerWidth)
+    var b =Math.floor(Math.random()*window.innerHeight)
+    this.mover.currx =  a;
+    this.mover.curry = b;
+    this.mover.first = false;
+    drawImageRot(image, this.mover.currx,this.mover.curry, image.width, image.height);
+  },
+  this.update = function(){
+    this.mover.currx = this.mover.currx+ this.mover.x;
+    this.mover.curry = this.mover.curry+ this.mover.y;
+    drawImageRot(image, this.mover.currx,this.mover.curry, image.width, image.height);
+  }
+}
 var c = canvas.getContext('2d');
 var bullets = []
 var image = new Image(50, 50);
 image.src = './images/character.gif';
+var z = new Player(image,'blue','Amit');
 
-var mover = {x:0,y:0,currx:0,curry:0,first:true}
 
 $(document).ready(function(){
   var a = window.innerWidth;
   var b = window.innerHeight;
-
+  z.start();
   canvas.width = (a);
   canvas.height = (b);
 })
@@ -40,18 +67,18 @@ function drawImageRot(img,x,y,width,height){
     c.translate((x + width / 2) * (-1), (y + height / 2) * (-1));
 }
 window.addEventListener('keydown',function(event){
-  if(event.key == 'w'&&mover.y>-1){
-    mover.y--;
-  }if(event.key == 'a'&&mover.x>-1){
-    mover.x--
-  }if(event.key == 'd'&&mover.x<1){
-    mover.x++;
-  }if(event.key == 's'&&mover.y<1){
-    mover.y++;
+  if(event.key == 'w'&&z.mover.y>-1){
+    z.mover.y--;
+  }if(event.key == 'a'&&z.mover.x>-1){
+    z.mover.x--
+  }if(event.key == 'd'&&z.mover.x<1){
+    z.mover.x++;
+  }if(event.key == 's'&&z.mover.y<1){
+    z.mover.y++;
   }
 })
 
-function Bullet(x,y,mousex,mousey){
+function Bullet(Player,x,y,mousex,mousey){
   this.x = x;
   this.y = y;
   this.xDiff = mousex-x;
@@ -63,7 +90,7 @@ function Bullet(x,y,mousex,mousey){
   this.start = function(){
     c.beginPath();
     c.arc(this.x,this.y,3,0,Math.PI*2,false)
-    c.strokeStyle = 'yellow'
+    c.strokeStyle = z.color
     c.stroke()
   };
   this.update = function(){
@@ -71,64 +98,52 @@ function Bullet(x,y,mousex,mousey){
     this.y+=this.dy;
     c.beginPath();
     c.arc(this.x,this.y,3,0,Math.PI*2,false)
-    c.strokeStyle = 'yellow'
+    c.strokeStyle = z.color
     c.stroke()
+    for (var alpha = 0; alpha< opponents.length;alpha++){
+      if(oppon)
+    }
+
   };
 };
 window.addEventListener('keyup',function(event){
   if(event.key == 'w'){
-    mover.y++;
+    z.mover.y++;
   }if(event.key == 'a'){
-    mover.x++
+    z.mover.x++
   }if(event.key == 'd'){
-    mover.x--;
+    z.mover.x--;
   }if(event.key == 's'){
-    mover.y--;
+    z.mover.y--;
   }
 })
 window.addEventListener('click',function(event){
-  var a = new Bullet(mover.currx+50,mover.curry+37,mouse.x,mouse.y)
+  var a = new Bullet(z,z.mover.currx+50,z.mover.curry+37,mouse.x,mouse.y)
   a.start();
   bullets.push(a);
 })
 
-function drawImageActualSize(image) {
-  // use the intrinsic size of image in CSS pixels for the canvas element
 
-  // will draw the image as 300x227 ignoring the custom size of 60x45
-  // given in the constructor
-  // To use the custom size we'll have to specify the scale parameters
-  // using the element's width and height properties - lets draw one
-  // on top in the corner:
-  if (mover.first){
-    var a = Math.floor(Math.random()*window.innerWidth)
-    var b =Math.floor(Math.random()*window.innerHeight)
-    mover.currx =  a;
-    mover.curry = b;
-    mover.first = false;
-  }else{
-    mover.currx = mover.currx+ mover.x;
-    mover.curry = mover.curry+ mover.y;
-  }
-  drawImageRot(image, mover.currx,mover.curry, image.width, image.height);
-}
+
 window.addEventListener('resize',function(){
   var a = window.innerWidth;
   var b = window.innerHeight;
   canvas.width = (a);
   canvas.height = (b);
 })
-
+z.start()
 function animate(){
   c.clearRect(0,0,window.innerWidth,window.innerHeight)
+  z.update();
   for(var n = 0; n<bullets.length;n++){
     bullets[n].update()
+
   }
      // using optional size for image// draw when image has loaded
 
   // load an image of intrinsic size 300x227 in CSS pixels
 
-  drawImageActualSize(image)
+  z.update()
 
   requestAnimationFrame(animate);
 }
