@@ -1,13 +1,13 @@
 var g = $('.game-field');
 var canvas = document.querySelector('canvas');
 var mouse ={};
-var mover = {x:0,y:0,currx:0,curry:0,first:true}
+
 var opponents = [];
 function Player(image,color,username,mover) {
   this.username = username;
   this.color = color;
   this.health=10;
-  this.mover = mover
+  this.mover = {x:0,y:0,currx:0,curry:0,first:true}
   this.start = function(){
     var a = Math.floor(Math.random()*window.innerWidth)
     var b =Math.floor(Math.random()*window.innerHeight)
@@ -26,12 +26,13 @@ var c = canvas.getContext('2d');
 var bullets = []
 var image = new Image(50, 50);
 image.src = './images/character.gif';
-var z = new Player(image,'blue','Amit');
-
+var z = new Player(image,'red','Amit');
+var q = new Player(image,'yellow','hello');
 $(document).ready(function(){
   var a = window.innerWidth;
   var b = window.innerHeight;
   z.start();
+  q.start();
   canvas.width = (a);
   canvas.height = (b);
 })
@@ -74,6 +75,11 @@ window.addEventListener('keydown',function(event){
 function Bullet(Player,x,y,mousex,mousey,opp){
   this.x = x;
   this.y = y;
+  var asdf = [];
+  for (var f = 0; f<opp.length;f++){
+    asdf.push(opp[f])
+  }
+  this.opp = asdf;
   this.xDiff = mousex-x;
   this.yDiff = mousey-y;
   this.velocity  = 30;
@@ -94,23 +100,12 @@ function Bullet(Player,x,y,mousex,mousey,opp){
     c.arc(this.x,this.y,this.radius,0,Math.PI*2,false)
     c.strokeStyle = z.color
     c.stroke()
-    for (var alpha = 0; alpha< opp.length ;alpha++){
-      var current = opp[alpha];
+    for (var alpha = 0; alpha< asdf.length ;alpha++){
+      var current = asdf[alpha];
       if(this.x+this.radius>current.mover.currx&&this.x-this.radius<current.mover.currx+45&&this.y+this.radius>current.mover.curry&&this.y-this.radius<current.mover.curry+45){
-        $.ajax({
-          method:'POST',
-          url:'http://owen-hackandslash.builtwithdark.com/damage',
-          data:{
-            username:z.username
-          }
-          ,success:function(successObj){
-            if(successObj.Player.health === 0){
-              alert(successObj.Player.username+" lost")
-            }
-          },error:function(err){
-            console.log(err);
-          }
-        })
+        alert('?')
+        asdf.splice(alpha,1)
+        alpha--;
       }
     }
 
@@ -146,68 +141,18 @@ window.addEventListener('resize',function(){
   canvas.width = (a);
   canvas.height = (b);
 })
+q.start()
 z.start()
+opponents.push(q)
 function animate(){
   c.clearRect(0,0,window.innerWidth,window.innerHeight)
-  opponents = []
-  $.ajax({
-    method:'POST',
-    url:'http://owen-hackandslash.builtwithdark.com/self',
-    data:{
-      mover:z.mover,
-      username:z.username
-    },success:function(){
-      $.ajax({
-        method:'GET',
-        url:'http://owen-hackandslash.builtwithdark.com/players?username='+z.username
-        ,success:function(successObj){
-          if(successObj.everyoneButMe!=undefined){
-            for(var qwert = 0; qwert<successObj.everyoneButMe;qwert++){
-              opponents.push(new Player(image,successObj.everyoneButMe.color,successObj.everyoneButMe.username,successObj.everyoneButMe.mover))
-            }
-          }
-          $.ajax({
-            method:'GET',
-            url:'http://owen-hackandslash.builtwithdark.com/health?username='+z.username
-            ,success:function(successObj){
-              z.health = successObj.health
-              $.ajax({
-                method:'GET',
-                url:'http://owen-hackandslash.builtwithdark.com/bullets'
-                ,success:function(successObj){
-                  if(successObj.bullets!=undefined){
-                    bullets = successObj.bullets
-                  }
-                },error:function(err){
-                  console.log(err);
-                }
-              })
-            },error:function(err){
-              console.log(err);
-            }
-          })
-        },error:function(err){
-          console.log(err);
-        }
-      })
-    },error:function(err){
-      console.log(err);
-    }
-  })
+  q.update()
 
   z.update();
-  for (var q = 0; q<opponents.length;q++){
-    opponents[q].update()
-  }
   for(var n = 0; n<bullets.length;n++){
     bullets[n].update()
 
   }
-     // using optional size for image// draw when image has loaded
-
-  // load an image of intrinsic size 300x227 in CSS pixels
-
-  z.update()
 
   requestAnimationFrame(animate);
 }
